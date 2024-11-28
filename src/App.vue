@@ -13,6 +13,7 @@ async function greet() {
 async function usb_call() {
   // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
   usb_callMsg.value = await invoke("usb_call");
+  console.log(usb_callMsg)
 }
 </script>
 

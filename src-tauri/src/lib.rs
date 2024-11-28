@@ -1,5 +1,4 @@
 use powershell_script::PsScriptBuilder;
-use std::io::{stdout, Write};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
