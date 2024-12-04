@@ -1,170 +1,101 @@
 <script setup>
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
-
-const greetMsg = ref("");
-const name = ref("");
-const usb_callMsg=ref("")
-
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke("greet", { name: name.value });
-}
+const usb_callMsg = ref("")
 async function usb_call() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  usb_callMsg.value = await invoke("usb_call");
-  console.log(usb_callMsg)
+  usb_callMsg.value = "";
+  let msg = await invoke("usb_call");
+  let msgArray = msg.trim().slice(204).split('\n')
+  let i = 0
+  while (i < msgArray.length) {
+    usb_callMsg.value += `<tr class="font-medium text-gray-900 p-4 whitespace-nowrap dark:text-white">`
+    usb_callMsg.value += `<td class="p-4">` + msgArray[i].slice(0, 7).trim() + `</td>`
+    usb_callMsg.value += `<td class="p-4">` + msgArray[i].slice(7, 7 + 5).trim() + `</td>`
+    usb_callMsg.value += `<td class="p-4">` + msgArray[i].slice(7 + 5, 74).trim() + `</td>`
+    usb_callMsg.value += `<td class="p-4">` + msgArray[i].slice(74).trim() + `</td>`
+    usb_callMsg.value += "</tr>"
+    i++
+  }
+
+
 }
+
+if (document.getElementById("default-table") && typeof simpleDatatables.DataTable !== 'undefined') {
+  const dataTable = new simpleDatatables.DataTable("#default-table", {
+    searchable: false,
+    perPageSelect: true
+  });
+}
+
 </script>
 
 <template>
-  <main class="container">
-    <h1>Welcome to Tauri + Vue</h1>
+  <div class="justify-center">
 
-    <div class="row">
-      <a href="https://vitejs.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
+
+    <div class="bg-stone-600 justify-center items-center flex">
+      <form class="" @submit.prevent="usb_call">
+        <button
+          class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800">
+          <span
+            class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+            Start
+          </span>
+        </button>
+      </form>
     </div>
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
+    <div class="justify-center items-center flex">
+      <table id="default-table">
+        <thead>
+          <tr>
+            <th>
+              <span class=" p-4 flex items-center">
+                Friendly Name
+                <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                </svg>
+              </span>
+            </th>
+            <th>
+              <span class="flex items-center">
+                Status
+                <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                </svg>
+              </span>
+            </th>
+            <th>
+              <span class=" p-4 flex items-center">
+                Class
+                <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                </svg>
+              </span>
+            </th>
+            <th>
+              <span class="flex p-4 items-center">
+                Instance id
+                <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                </svg>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody v-html="usb_callMsg">
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <form class="row" @submit.prevent="greet">
-      <input id="greet-input" v-model="name" placeholder="Enter a name..." />
-      <button type="submit">Greet</button>
-    </form>
-    <p>{{ greetMsg }}</p>
-    <form class="row" @submit.prevent="usb_call">
-      <button type="submit">Usb call</button>
-    </form>
-    <p>{{ usb_callMsg }}</p>
-  </main>
+
 </template>
-
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-
-</style>
-<style>
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
-
-</style>
